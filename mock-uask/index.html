@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UAsk Mock</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #f4f6f8; }
+    html[dir="rtl"] body { direction: rtl; }
+    .chatContainer { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    .welcome-message, .message-title { color: #333; margin-bottom: 12px; }
+    .full-body { min-height: 280px; max-height: 400px; overflow-y: auto; padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; }
+    .message-row { margin: 10px 0; padding: 10px 12px; border-radius: 8px; line-height: 1.5; }
+    .user-message, [data-role="user-message"] { background: #e8f0fe; text-align: start; }
+    html[dir="rtl"] .user-message { text-align: right; }
+    .bot-message, [data-role="bot-message"] { background: #f0fdf4; border-left: 3px solid #16a34a; }
+    html[dir="rtl"] .bot-message { border-left: none; border-right: 3px solid #16a34a; }
+    .loading-indicator { display: none; color: #666; font-style: italic; padding: 8px; }
+    .loading-indicator.visible { display: block; }
+    .error-message, [data-role="fallback"] { display: none; color: #b91c1c; padding: 8px; }
+    .error-message.visible { display: block; }
+    .input-row { display: flex; gap: 8px; align-items: flex-end; }
+    #conversation { flex: 1; min-height: 72px; padding: 10px; font-size: 16px; resize: vertical; }
+    .send-question { padding: 10px 16px; background: #0d47a1; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    .send-question:disabled { opacity: 0.5; cursor: not-allowed; }
+    .terms-modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; }
+    .terms-modal.hidden { display: none; }
+    .terms-box { background: #fff; padding: 24px; border-radius: 8px; max-width: 400px; }
+    .btn-brand { background: #0d47a1; color: #fff; border: none; padding: 8px 16px; margin-right: 8px; cursor: pointer; }
+    .btn-cancel { background: #eee; border: none; padding: 8px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="terms-modal" id="terms">
+    <div class="terms-box">
+      <p id="terms-text">Terms of Service</p>
+      <button class="btn-brand" id="accept" aria-label="Accept and continue">Accept and continue</button>
+      <button class="btn-cancel" id="decline" aria-label="Decline">Decline</button>
+    </div>
+  </div>
+
+  <div class="chatContainer focused-chat">
+    <h5 class="message-title welcome-message" id="welcome">Hello, good day. How can I help you?</h5>
+    <div class="full-body content-body" id="messages" aria-live="polite"></div>
+    <div class="loading-indicator" id="loading" data-role="loading">Thinking...</div>
+    <div class="error-message" id="fallback" data-role="fallback"></div>
+    <div class="input-row">
+      <textarea id="conversation" rows="3" maxlength="2000" role="textbox"
+        aria-label="Please ask me a question" placeholder="Please ask me a question"></textarea>
+      <button type="button" class="send-question" aria-label="Send Message">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const lang = params.get('lang') === 'ar' ? 'ar' : 'en';
+    const isAr = lang === 'ar';
+
+    document.documentElement.lang = isAr ? 'ar' : 'en';
+    document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+
+    const i18n = {
+      en: {
+        welcome: 'Hello, good day. How can I help you?',
+        placeholder: 'Please ask me a question',
+        inputLabel: 'Please ask me a question',
+        accept: 'Accept and continue',
+        decline: 'Decline',
+        terms: 'Terms of Service',
+        loading: 'Thinking...',
+        fallback: 'Sorry, please try again later.',
+        send: 'Send Message',
+      },
+      ar: {
+        welcome: 'مرحباً، كيف يمكنني مساعدتك؟',
+        placeholder: 'من فضلك، اطرح سؤالك',
+        inputLabel: 'من فضلك، اطرح سؤالك',
+        accept: 'قبول ومتابعة',
+        decline: 'رفض',
+        terms: 'شروط الخدمة',
+        loading: 'جاري المعالجة...',
+        fallback: 'عذراً، يرجى المحاولة مرة أخرى.',
+        send: 'Send Message',
+      },
+    };
+    const t = i18n[lang];
+
+    document.getElementById('welcome').textContent = t.welcome;
+    const input = document.getElementById('conversation');
+    input.placeholder = t.placeholder;
+    input.setAttribute('aria-label', t.inputLabel);
+    input.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('accept').textContent = t.accept;
+    document.getElementById('accept').setAttribute('aria-label', t.accept);
+    document.getElementById('decline').textContent = t.decline;
+    document.getElementById('decline').setAttribute('aria-label', t.decline);
+    document.getElementById('terms-text').textContent = t.terms;
+    document.getElementById('loading').textContent = t.loading;
+    document.getElementById('fallback').textContent = t.fallback;
+    document.querySelector('.send-question').setAttribute('aria-label', t.send);
+
+    const messages = document.getElementById('messages');
+    const loading = document.getElementById('loading');
+    const fallbackEl = document.getElementById('fallback');
+    const sendBtn = document.querySelector('.send-question');
+    const terms = document.getElementById('terms');
+
+    document.getElementById('accept').onclick = () => terms.classList.add('hidden');
+    document.getElementById('decline').onclick = () => terms.classList.add('hidden');
+
+    const responses = {
+      en: {
+        visa: 'To apply for a UAE residence visa, visit the Federal Authority for Identity, Citizenship, Customs and Port Security (ICP) or relevant typing centre. Requirements depend on your sponsor and visa type. Check official UAE government portals for current fees and documents.',
+        emirates: 'Emirates ID is issued by the Federal Authority for Identity, Citizenship, Customs and Port Security (ICP). Residents can apply or renew through ICP smart services or authorised centres across the UAE.',
+        traffic: 'Traffic fines in the UAE can be checked and paid through official police websites or apps in each emirate, such as Dubai Police or Abu Dhabi Police platforms.',
+        business: 'Business licences in the UAE are issued by economic departments in each emirate and through federal platforms. Requirements vary by activity and legal form.',
+        golden: 'The UAE Golden Visa is a long-term residence programme for investors, entrepreneurs, and talented professionals. Eligibility criteria are published by ICP and GDRFA.',
+        health: 'Health insurance is mandatory for UAE residents in most emirates. Employers typically provide coverage for employees; check DHA, DOH, or SEHA requirements.',
+        passport: 'UAE citizens can apply for a new passport through the Federal Authority for Identity, Citizenship, Customs and Port Security (ICP) smart services or service centres.',
+        vat: 'VAT registration for UAE businesses is managed through the Federal Tax Authority (FTA). Entities above mandatory thresholds must register and file via official FTA channels.',
+        default: 'The UAE Government provides many public services through official portals such as u.ae. For specific procedures, please refer to the relevant ministry or emirate authority website.',
+        injection: 'I can help with UAE government public services and official information. I cannot ignore my guidelines. How may I assist you with government services?',
+        xss: 'Your message was received. For security, HTML tags are not executed in this chat.',
+        gibberish: '',
+      },
+      ar: {
+        visa: 'للتقدم على تأشيرة إقامة في دولة الإمارات، يمكنك التواصل مع الهيئة الاتحادية للهوية والجنسية والجمارك وأمن المنافذ (ICP) أو مراكز الطباعة المعتمدة. تختلف المتطلبات حسب الكفيل ونوع التأشيرة.',
+        emirates: 'بطاقة الهوية الإماراتية تصدرها الهيئة الاتحادية للهوية والجنسية والجمارك وأمن المنافذ (ICP). يمكن للمقيمين التقديم أو التجديد عبر الخدمات الذكية.',
+        traffic: 'يمكن الاستعلام عن مخالفات المرور ودفعها عبر المواقع والتطبيقات الرسمية للشرطة في كل إمارة من إمارات دولة الإمارات.',
+        business: 'رخص الأعمال في الإمارات تصدرها دائرة التنمية الاقتصادية في كل إمارة والمنصات الاتحادية حسب نوع النشاط.',
+        golden: 'الإقامة الذهبية برنامج إقامة طويلة للمستثمرين ورواد الأعمال والمواهب. معايير الأهلية تنشرها الهيئة الاتحادية للهوية (ICP) والإدارة العامة للإقامة.',
+        health: 'التأمين الصحي إلزامي للمقيمين في معظم إمارات الدولة. يوفره صاحب العمل عادةً للموظفين؛ يجب على المعالين مراجعة متطلبات هيئة الصحة.',
+        passport: 'يمكن لمواطني الإمارات التقديم على جواز سفر عبر الخدمات الذكية للهيئة الاتحادية للهوية (ICP) أو مراكز الخدمة.',
+        vat: 'تسجيل ضريبة القيمة المضافة للمنشآت يتم عبر الهيئة الاتحادية للضرائب (FTA) للكيانات التي تتجاوز الحدود المقررة.',
+        default: 'توفر حكومة الإمارات خدمات عامة عبر البوابات الرسمية مثل u.ae. للإجراءات المحددة، يرجى مراجعة الجهة المختصة.',
+        injection: 'يمكنني المساعدة في خدمات الحكومة الإماراتية والمعلومات الرسمية. لا يمكنني تجاهل التعليمات. كيف أساعدك في الخدمات الحكومية؟',
+        xss: 'تم استلام رسالتك. لأسباب أمنية، لا يتم تنفيذ وسوم HTML في هذه المحادثة.',
+        gibberish: '',
+      },
+    };
+
+    function pickResponse(text) {
+      const lower = text.toLowerCase();
+      if (/<script/i.test(text)) return responses[lang].xss;
+      if (/ignore.*instruction|tell me a joke/i.test(lower)) return responses[lang].injection;
+      if (/^@+$|^[^a-zA-Z\u0600-\u06FF]{1,8}$/.test(text.trim())) return responses[lang].gibberish;
+      if (/visa|إقامة|تأشيرة/i.test(text)) return responses[lang].visa;
+      if (/emirates id|هوية/i.test(text)) return responses[lang].emirates;
+      if (/traffic|fine|مخالف|مرور/i.test(text)) return responses[lang].traffic;
+      if (/vat|ضريبة|قيمة مضافة/i.test(text) || /\btax\b/i.test(lower)) return responses[lang].vat;
+      if (/golden|ذهبية|golden visa/i.test(text)) return responses[lang].golden;
+      if (/health|insurance|تأمين|صحي/i.test(text)) return responses[lang].health;
+      if (/passport|جواز/i.test(text)) return responses[lang].passport;
+      if (/business|license|رخص|تجاري/i.test(text)) return responses[lang].business;
+      return responses[lang].default;
+    }
+
+    function addMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = role === 'user' ? 'message-row user-message' : 'message-row bot-message';
+      div.setAttribute('data-role', role === 'user' ? 'user-message' : 'bot-message');
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function handleSend() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      sendBtn.disabled = true;
+      loading.classList.add('visible');
+      fallbackEl.classList.remove('visible');
+
+      await new Promise((r) => setTimeout(r, 600));
+
+      const reply = pickResponse(text);
+      loading.classList.remove('visible');
+      sendBtn.disabled = false;
+
+      if (!reply) {
+        fallbackEl.textContent = t.fallback;
+        fallbackEl.classList.add('visible');
+        return;
+      }
+      addMessage(reply, 'bot');
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+  </script>
+</body>
+</html>
