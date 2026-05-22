@@ -7,7 +7,7 @@ test.describe('Security and injection handling', () => {
   const validator = new UaskResponseValidator();
 
   for (const scenario of data.security) {
-    test(`[${scenario.id}] handles malicious input safely`, async ({ chat, page }) => {
+    test(`[${scenario.id}] sanitizes and handles malicious input safely`, async ({ chat, page }) => {
       let dialogFired = false;
       page.on('dialog', () => {
         dialogFired = true;
@@ -42,7 +42,7 @@ test.describe('Security and injection handling', () => {
     });
   }
 
-  test('XSS payload is not executed in the page', async ({ chat, page }) => {
+  test('Does not execute XSS payloads in the browser', async ({ chat, page }) => {
     await chat.sendMessage("<script>alert('xss')</script>");
     const dialog = page.waitForEvent('dialog', { timeout: 2_000 }).catch(() => null);
     await chat.page.waitForTimeout(1_000);

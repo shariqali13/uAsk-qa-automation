@@ -15,14 +15,24 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : 2,
+  workers: process.env.CI ? 1 : 4,
   timeout: responseTimeout + 30_000,
   expect: { timeout: 15_000 },
-  reporter: [
-    ['list'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results/results.json' }],
-  ],
+  reporter: (() => {
+    const base = [
+      ['list'],
+      ['html', { open: 'never', outputFolder: 'playwright-report' }],
+      ['json', { outputFile: 'test-results/results.json' }],
+    ];
+    if (process.env.RP_ENDPOINT && process.env.RP_TOKEN && process.env.RP_PROJECT) {
+      // Add ReportPortal reporter (custom lightweight implementation)
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const rpPath = require.resolve('./reportportal/reporter.js');
+      base.push([rpPath as any, { endpoint: process.env.RP_ENDPOINT, token: process.env.RP_TOKEN, project: process.env.RP_PROJECT, launch: process.env.RP_LAUNCH } as any]);
+    }
+    return base;
+  })() as any,
+
   webServer: useMock
     ? {
         command: 'npx --yes serve mock-uask -l 4173',

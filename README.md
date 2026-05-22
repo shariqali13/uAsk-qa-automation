@@ -121,3 +121,28 @@ TEST_SCENARIOS.md          # Scenario matrix (deliverable)
 - **Network**: Live tests may require UAE-accessible network; timeouts are extended for slow AI latency.
 - See [TEST_SCENARIOS.md](./TEST_SCENARIOS.md) for the full case-study scenario checklist.
 - **Technical summary:** Generate a structured overview with `node scripts/generate-framework-pdf.mjs`.
+
+## ReportPortal integration (optional)
+
+You can send test results to a ReportPortal instance. Configure the following environment variables in your `.env` file:
+
+```
+RP_ENDPOINT=https://reportportal.mycompany.com
+RP_TOKEN=your_api_token
+RP_PROJECT=your_project_name
+RP_LAUNCH=UAsk-Automation
+```
+
+When these are present Playwright will load a lightweight reporter that posts launches and test items to ReportPortal. Run tests as usual; the reporter activates automatically when `RP_ENDPOINT`, `RP_TOKEN`, and `RP_PROJECT` are set.
+
+If your environment does not provide a global `fetch`, install `node-fetch`:
+
+```bash
+npm install --save-dev node-fetch
+```
+
+Then run tests (headed if you want the browser visible):
+
+```bash
+RP_ENDPOINT=... RP_TOKEN=... RP_PROJECT=... npm test -- --headed
+```

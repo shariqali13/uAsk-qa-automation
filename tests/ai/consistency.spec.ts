@@ -10,7 +10,7 @@ test.describe('Bilingual consistency', () => {
   const pairs = loadTestData().consistencyPairs;
 
   for (const pair of pairs) {
-    test(`[${pair.id}] EN and AR responses share intent`, async ({ page }) => {
+    test(`[${pair.id}] English and Arabic responses convey the same intent`, async ({ page }) => {
       test.skip(!useMock(), 'Consistency tests require USE_MOCK=true (live AI blocked by reCAPTCHA)');
 
       const chatEn = new ChatPage(page, 'en');

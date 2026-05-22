@@ -5,7 +5,7 @@ import { useMock } from '../../src/utils/locales';
 test.describe('Loading and fallback states', () => {
   test.slow();
 
-  test('loading indicator appears while waiting for response', async ({ chat }) => {
+  test('Shows loading indicator while awaiting AI response', async ({ chat }) => {
     test.skip(!useMock(), 'Loading timing assertions use mock simulator');
 
     const responsePromise = chat.sendMessage('How do I apply for a UAE residence visa?');
@@ -19,7 +19,7 @@ test.describe('Loading and fallback states', () => {
     expect(sawLoading).toBe(true);
   });
 
-  test('fallback message appears for gibberish input', async ({ chat }) => {
+  test('Displays fallback message for unsupported/gibberish input', async ({ chat }) => {
     test.skip(!useMock(), 'Fallback trigger validated on mock (live API may differ)');
 
     const trigger = loadTestData().fallbackTriggers[0];
@@ -35,7 +35,7 @@ test.describe('Loading and fallback states', () => {
     expect(matched).toBe(true);
   });
 
-  test('valid query returns bot message instead of fallback', async ({ chat }) => {
+  test('Valid queries return normal bot responses, not fallback', async ({ chat }) => {
     await chat.sendMessage('How do I renew my Emirates ID?');
     const response = await chat.waitForBotResponse();
     expect(response.length).toBeGreaterThan(30);

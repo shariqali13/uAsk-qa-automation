@@ -11,7 +11,7 @@ test.describe('U-Ask response validation', () => {
   const queries = queriesForLang(lang).slice(0, useMock() ? undefined : 3);
 
   for (const scenario of queries) {
-    test(`[${scenario.id}] provides helpful on-topic response`, async ({ chat }) => {
+    test(`[${scenario.id}] returns a clear, helpful answer for public-service queries`, async ({ chat }) => {
       await chat.sendMessage(scenario.prompt);
       const response = await chat.waitForBotResponse();
       expect(response.length).toBeGreaterThan(0);
@@ -33,7 +33,7 @@ test.describe('U-Ask response validation', () => {
     });
   }
 
-  test('responses avoid generic AI disclaimer phrases', async ({ chat }) => {
+  test('Responses do not include generic AI-disclaimer phrases', async ({ chat }) => {
     const data = loadTestData();
     const q = data.publicServiceQueries.find((x) => x.lang === lang) ?? data.publicServiceQueries[0];
     await chat.sendMessage(q.prompt);
