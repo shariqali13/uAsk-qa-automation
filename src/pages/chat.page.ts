@@ -2,7 +2,6 @@ import { expect, Locator, Page } from '@playwright/test';
 import {
   getAcceptButtonName,
   getBaseUrl,
-  getInputLabel,
   getLangPath,
   Lang,
   useMock,
@@ -11,7 +10,6 @@ import {
 export class ChatPage {
   readonly page: Page;
   readonly lang: Lang;
-  readonly chatPanel: Locator;
   readonly messageInput: Locator;
   readonly sendButton: Locator;
   readonly conversationArea: Locator;
@@ -19,7 +17,6 @@ export class ChatPage {
   constructor(page: Page, lang: Lang = 'en') {
     this.page = page;
     this.lang = lang;
-    this.chatPanel = page.locator('.chatContainer, .full-body, .main-content').first();
     this.messageInput = page.locator('#conversation');
     this.sendButton = page.locator('.send-question');
     this.conversationArea = page.locator('.full-body, .content-body, .chatContainer').first();
@@ -91,7 +88,9 @@ export class ChatPage {
   async getLastUserMessage(): Promise<string> {
     if (useMock()) {
       const userMsgs = this.page.locator('[data-role="user-message"]');
-      return (await userMsgs.nth((await userMsgs.count()) - 1).innerText()).trim();
+      const count = await userMsgs.count();
+      if (count === 0) return '';
+      return (await userMsgs.nth(count - 1).innerText()).trim();
     }
     const text = await this.page
       .locator('.card-listing.d-block .container, .history-text, [data-role="user-message"]')

@@ -10,10 +10,6 @@ export function getAcceptButtonName(lang: Lang): RegExp {
   return lang === 'ar' ? /قبول ومتابعة|accept/i : /accept and continue/i;
 }
 
-export function getInputLabel(lang: Lang): RegExp {
-  return lang === 'ar' ? /اطرح سؤالك/i : /ask me a question/i;
-}
-
 export function resolveLang(): Lang {
   return process.env.TEST_LANG === 'ar' ? 'ar' : 'en';
 }

@@ -1,12 +1,12 @@
 import { test, expect } from '../fixtures/chat.fixture';
-import { AiResponseValidator } from '../../src/validators/ai-response.validator';
-import { isLlmJudgeEnabled, LlmJudge } from '../../src/validators/llm-judge';
+import { UaskResponseValidator } from '../../src/validators/ai-response.validator';
+import { isUaskOpenAiReviewEnabled, UaskOpenAiReview } from '../../src/validators/uask-openai-review';
 import { loadTestData, queriesForLang } from '../../src/utils/test-data';
 import { resolveLang, useMock } from '../../src/utils/locales';
 
-test.describe('GPT response quality', () => {
+test.describe('U-Ask response validation', () => {
   test.slow();
-  const validator = new AiResponseValidator();
+  const validator = new UaskResponseValidator();
   const lang = resolveLang();
   const queries = queriesForLang(lang).slice(0, useMock() ? undefined : 3);
 
@@ -23,9 +23,9 @@ test.describe('GPT response quality', () => {
       expect(validator.completeThought(response)).toBe(true);
       expect(validator.uaeContextScore(response)).toBeGreaterThan(0);
 
-      if (isLlmJudgeEnabled()) {
-        const judge = new LlmJudge();
-        const verdict = await judge.evaluate(scenario.prompt, response, scenario.expect);
+      if (isUaskOpenAiReviewEnabled()) {
+        const reviewer = new UaskOpenAiReview();
+        const verdict = await reviewer.evaluate(scenario.prompt, response, scenario.expect);
         expect(verdict.score).toBeGreaterThanOrEqual(3);
         expect(verdict.hallucination).toBe(false);
         expect(verdict.onTopic).toBe(true);

@@ -1,6 +1,6 @@
-# U-Ask AI/ML QA Automation
+# U-Ask Conversational QA Automation
 
-End-to-end automated tests for the UAE Government **U-Ask** chatbot: UI behavior, AI response quality (rule-based + optional LLM judge), multilingual RTL/LTR, security/injection, and accessibility.
+End-to-end automated tests for the UAE Government **U-Ask** chatbot: UI behavior, response validation, multilingual RTL/LTR support, security checks, and accessibility.
 
 ## Prerequisites
 
@@ -11,8 +11,7 @@ End-to-end automated tests for the UAE Government **U-Ask** chatbot: UI behavior
 
 ```bash
 cd /Users/mohdshariq/Documents/uAsk
-npm install
-PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium webkit
+npm run setup
 cp .env.example .env
 ```
 
@@ -20,7 +19,7 @@ cp .env.example .env
 
 | Mode | URL | When to use |
 |------|-----|-------------|
-| **Mock** (default) | `http://127.0.0.1:4173` | Reliable CI and AI/ML validation (no reCAPTCHA) |
+| **Mock** (default) | `http://127.0.0.1:4173` | Reliable CI and response validation (no reCAPTCHA) |
 | **Live beta** | `https://beta-ask.u.ae/en/ta` | Real widget DOM and UI smoke tests |
 | **Production** | `https://ask.u.ae` | Set `BASE_URL` and paths in `.env` if your deployment differs |
 
@@ -63,10 +62,10 @@ npm run test:live
 npm run test:mock
 ```
 
-### Optional LLM-as-judge
+### Optional OpenAI validation
 
 ```bash
-USE_LLM_JUDGE=true OPENAI_API_KEY=sk-... npm run test:ai
+USE_OPENAI_REVIEW=true OPENAI_API_KEY=sk-... npm run test:ai
 ```
 
 ### View HTML report
@@ -96,7 +95,7 @@ On failure, Playwright saves:
 ```
 test-data/test-data.json   # EN/AR prompts and expectations
 src/pages/chat.page.ts     # Page Object Model
-src/validators/            # Rule-based + LLM judge
+src/validators/            # Rule-based + OpenAI review
 tests/ui/                  # Widget, multilingual, a11y
 tests/ai/                  # Response quality, consistency, loading
 tests/security/            # XSS and prompt injection
@@ -112,11 +111,13 @@ TEST_SCENARIOS.md          # Scenario matrix (deliverable)
 | `BASE_URL` | `https://beta-ask.u.ae` | Live chatbot host |
 | `TEST_LANG` | `en` | `en` or `ar` for data-driven AI tests |
 | `RESPONSE_TIMEOUT_MS` | `90000` | Max wait for bot reply |
-| `USE_LLM_JUDGE` | `false` | Enable OpenAI rubric scoring |
-| `OPENAI_API_KEY` | — | Required when `USE_LLM_JUDGE=true` |
+| `USE_OPENAI_REVIEW` | `false` | Enable U-Ask OpenAI rubric scoring |
+| `USE_LLM_JUDGE` | `false` | Legacy alias for `USE_OPENAI_REVIEW` |
+| `OPENAI_API_KEY` | — | Required when `USE_OPENAI_REVIEW=true` or `USE_LLM_JUDGE=true` |
 
 ## Notes
 
 - **Desktop + mobile**: Projects `desktop-chrome` and `mobile-safari` run the same specs; mobile requires WebKit (`npx playwright install webkit`).
 - **Network**: Live tests may require UAE-accessible network; timeouts are extended for slow AI latency.
 - See [TEST_SCENARIOS.md](./TEST_SCENARIOS.md) for the full case-study scenario checklist.
+- **Technical summary:** Generate a structured overview with `node scripts/generate-framework-pdf.mjs`.

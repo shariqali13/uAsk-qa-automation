@@ -1,6 +1,6 @@
 # U-Ask Test Scenario Matrix
 
-Summary of automated scenarios for the AI/ML QA case study. Execution status is recorded in Playwright HTML report (`playwright-report/`) and optional `test-results/SUMMARY.md` after `npm run report:summary`.
+Summary of automated scenarios for the U-Ask QA case study. Execution status is recorded in Playwright HTML report (`playwright-report/`) and optional `test-results/SUMMARY.md` after `npm run report:summary`.
 
 ## 1. Chatbot UI behavior
 
@@ -28,7 +28,7 @@ Summary of automated scenarios for the AI/ML QA case study. Execution status is 
 | AI-04 | Clean formatting | `response-quality.spec.ts` | No raw HTML; terminal punctuation |
 | AI-05 | Loading state | `tests/ai/loading-fallback.spec.ts` | Loading indicator during reply (mock) |
 | AI-06 | Fallback message | `loading-fallback.spec.ts` | Sorry / try again patterns for gibberish |
-| AI-07 | Optional LLM judge | `response-quality.spec.ts` | Score ≥ 3, no hallucination when enabled |
+| AI-07 | Optional OpenAI review | `response-quality.spec.ts` | Score ≥ 3, no hallucination when enabled |
 
 Data: `test-data/test-data.json` — `publicServiceQueries`, `consistencyPairs`.
 
@@ -58,6 +58,7 @@ Data: `test-data/test-data.json` — `security`, `fallbackTriggers`.
 | Automated scripts | `tests/` |
 | Test data | `test-data/test-data.json` |
 | Run instructions | `README.md` |
+| Technical summary generator | `scripts/generate-framework-pdf.mjs` |
 | Scenario matrix | This file |
 | HTML execution report | `playwright-report/` |
 | Run summary | `test-results/SUMMARY.md` (after `npm run report:summary`) |

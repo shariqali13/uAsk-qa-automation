@@ -50,8 +50,10 @@ async function discover(url: string, label: string) {
 
 async function main() {
   const base = process.env.BASE_URL ?? 'https://ask.u.ae';
-  await discover(`${base}/en/uask/en`, 'en');
-  await discover(`${base}/ar/uask/ar`, 'ar');
+  const enPath = process.env.EN_PATH ?? '/en/ta';
+  const arPath = process.env.AR_PATH ?? '/ar/ta';
+  await discover(`${base}${enPath}`, 'en');
+  await discover(`${base}${arPath}`, 'ar');
 }
 
 main();

@@ -1,8 +1,9 @@
 {
   "name": "uask-qa-automation",
   "version": "1.0.0",
-  "description": "AI/ML QA automation for UAE Government U-Ask chatbot",
+  "description": "U-Ask conversational QA automation for UAE government chatbot validation",
   "scripts": {
+    "setup": "npm install && npx playwright install chromium webkit",
     "test": "USE_MOCK=true playwright test",
     "test:ui": "playwright test tests/ui",
     "test:ai": "playwright test tests/ai",
@@ -15,13 +16,11 @@
   "keywords": ["u-ask", "playwright", "qa", "ai-testing"],
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "@types/node": "^22.19.15",
-    "dotenv": "^16.6.1",
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "@axe-core/playwright": "^4.11.1",
-    "openai": "^4.104.0"
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^20.14.4",
+    "dotenv": "^17.4.2",
+    "openai": "^6.38.0",
+    "typescript": "^6.0.3"
   }
 }

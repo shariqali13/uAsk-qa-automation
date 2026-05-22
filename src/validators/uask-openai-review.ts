@@ -9,14 +9,15 @@ export interface JudgeResult {
   reasoning: string;
 }
 
-export function isLlmJudgeEnabled(): boolean {
+export function isUaskOpenAiReviewEnabled(): boolean {
   return (
-    (process.env.USE_LLM_JUDGE === 'true' || process.env.USE_LLM_JUDGE === '1') &&
+    (process.env.USE_OPENAI_REVIEW === 'true' || process.env.USE_OPENAI_REVIEW === '1' ||
+      process.env.USE_LLM_JUDGE === 'true' || process.env.USE_LLM_JUDGE === '1') &&
     !!process.env.OPENAI_API_KEY
   );
 }
 
-export class LlmJudge {
+export class UaskOpenAiReview {
   private client: OpenAI;
 
   constructor() {
@@ -51,14 +52,24 @@ export class LlmJudge {
       ],
     });
 
-    const raw = completion.choices[0]?.message?.content ?? '{}';
-    const parsed = JSON.parse(raw) as JudgeResult;
-    return {
-      score: Number(parsed.score) || 1,
-      hallucination: !!parsed.hallucination,
-      onTopic: !!parsed.onTopic,
-      helpful: !!parsed.helpful,
-      reasoning: parsed.reasoning ?? '',
-    };
+    const raw = completion.choices[0]?.message?.content?.trim() ?? '{}';
+    try {
+      const parsed = JSON.parse(raw) as JudgeResult;
+      return {
+        score: Number(parsed.score) || 1,
+        hallucination: !!parsed.hallucination,
+        onTopic: !!parsed.onTopic,
+        helpful: !!parsed.helpful,
+        reasoning: parsed.reasoning ?? '',
+      };
+    } catch (error) {
+      return {
+        score: 1,
+        hallucination: true,
+        onTopic: false,
+        helpful: false,
+        reasoning: `OpenAI evaluation parse failed: ${error instanceof Error ? error.message : 'invalid response'}`,
+      };
+    }
   }
 }

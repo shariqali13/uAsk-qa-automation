@@ -23,7 +23,7 @@ const UAE_KEYWORDS = [
 const FABRICATED_URL = /https?:\/\/(?!.*\.(gov\.ae|u\.ae|ask\.u\.ae))/i;
 const PHONE_PATTERN = /\+?\d{2,3}[-.\s]?\d{3,4}[-.\s]?\d{4,}/;
 
-export class AiResponseValidator {
+export class UaskResponseValidator {
   validate(response: string, expect: QueryExpect, userPrompt?: string): ValidationResult {
     const errors: string[] = [];
     const text = response.trim();

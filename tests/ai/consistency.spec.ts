@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { ChatPage } from '../../src/pages/chat.page';
-import { AiResponseValidator } from '../../src/validators/ai-response.validator';
+import { UaskResponseValidator } from '../../src/validators/ai-response.validator';
 import { loadTestData } from '../../src/utils/test-data';
 import { useMock } from '../../src/utils/locales';
 
 test.describe('Bilingual consistency', () => {
   test.slow();
-  const validator = new AiResponseValidator();
+  const validator = new UaskResponseValidator();
   const pairs = loadTestData().consistencyPairs;
 
   for (const pair of pairs) {

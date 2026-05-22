@@ -1,10 +1,10 @@
 import { test, expect } from '../fixtures/chat.fixture';
 import { loadTestData } from '../../src/utils/test-data';
-import { AiResponseValidator } from '../../src/validators/ai-response.validator';
+import { UaskResponseValidator } from '../../src/validators/ai-response.validator';
 
 test.describe('Security and injection handling', () => {
   const data = loadTestData();
-  const validator = new AiResponseValidator();
+  const validator = new UaskResponseValidator();
 
   for (const scenario of data.security) {
     test(`[${scenario.id}] handles malicious input safely`, async ({ chat, page }) => {
